@@ -1,0 +1,51 @@
+Aarav Sharma
+
+Email: [aarav.sharma@example.com](mailto:aarav.sharma@example.com)
+Phone: +91 9876543210
+Location: Bengaluru, Karnataka, India
+
+Professional Summary
+
+AI and Machine Learning Engineer with 3 years of experience building NLP applications, recommendation systems, and production-ready machine learning pipelines. Skilled in Python, LangChain, PyTorch, and cloud deployment.
+
+Skills
+
+Python, Machine Learning, Deep Learning, PyTorch, TensorFlow, LangChain, LangGraph, FastAPI, Docker, Git, PostgreSQL, AWS, NLP, Vector Databases
+
+Work Experience
+
+Machine Learning Engineer – TechNova Solutions (2023–Present)
+
+* Developed a customer support chatbot using LangChain and vector databases.
+* Improved response accuracy by 28%.
+* Built model evaluation pipelines for LLM applications.
+
+AI Intern – DataMinds Analytics (2022–2023)
+
+* Assisted in training classification models for customer segmentation.
+* Built dashboards for model monitoring and reporting.
+
+Projects
+
+Resume Screening System
+
+* Built an ATS-style resume ranking application using embeddings and semantic search.
+
+Research Assistant Chatbot
+
+* Developed a document question-answering system using RAG and LangChain.
+
+Education
+
+Bachelor of Technology in Computer Science
+Visvesvaraya Technological University
+2022
+
+Certifications
+
+* AWS Certified Cloud Practitioner
+* Deep Learning Specialization (Coursera)
+
+GitHub
+
+https://github.com/aaravsharma

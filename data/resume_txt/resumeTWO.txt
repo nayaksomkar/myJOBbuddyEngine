@@ -1,0 +1,50 @@
+Priya Nair
+
+Email: [priya.nair@example.com](mailto:priya.nair@example.com)
+Phone: +91 9988776655
+Location: Kochi, Kerala, India
+
+Professional Summary
+
+Backend Software Engineer with 5 years of experience designing scalable APIs, distributed systems, and database-driven applications. Experienced in Python, Node.js, PostgreSQL, and cloud-native development.
+
+Skills
+
+Python, Node.js, FastAPI, Django, Express.js, PostgreSQL, MySQL, Redis, Docker, Kubernetes, AWS, Linux, GitHub Actions
+
+Work Experience
+
+Senior Backend Engineer – CloudEdge Systems (2022–Present)
+
+* Designed microservices handling over 2 million API requests daily.
+* Reduced database latency by 35% through optimization strategies.
+
+Software Engineer – BlueTech Labs (2020–2022)
+
+* Built REST APIs and authentication services.
+* Implemented CI/CD pipelines for production deployments.
+
+Projects
+
+Inventory Management Platform
+
+* Developed a scalable inventory system for retail businesses.
+
+Event Booking API
+
+* Built a ticket booking backend supporting real-time seat allocation.
+
+Education
+
+Bachelor of Engineering in Information Technology
+University of Kerala
+2020
+
+Certifications
+
+* Docker Certified Associate
+* AWS Solutions Architect Associate
+
+LinkedIn
+
+https://linkedin.com/in/priyanair

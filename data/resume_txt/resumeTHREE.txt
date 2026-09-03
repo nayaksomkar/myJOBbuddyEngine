@@ -1,0 +1,50 @@
+Rahul Verma
+
+Email: [rahul.verma@example.com](mailto:rahul.verma@example.com)
+Phone: +91 9123456780
+Location: Pune, Maharashtra, India
+
+Professional Summary
+
+Data Analyst with 4 years of experience transforming business data into actionable insights. Proficient in SQL, Power BI, Excel, Python, and statistical analysis.
+
+Skills
+
+SQL, Python, Pandas, NumPy, Power BI, Tableau, Excel, Data Visualization, Statistics, Business Intelligence, ETL
+
+Work Experience
+
+Data Analyst – InsightWorks Consulting (2021–Present)
+
+* Created executive dashboards used by senior management.
+* Automated reporting workflows, reducing manual effort by 70%.
+
+Junior Data Analyst – SmartMetrics Pvt Ltd (2020–2021)
+
+* Performed customer behavior analysis and KPI tracking.
+* Built data cleaning pipelines using Python and SQL.
+
+Projects
+
+Sales Forecasting Dashboard
+
+* Developed predictive sales reports using historical transaction data.
+
+Customer Churn Analysis
+
+* Built machine learning models to identify at-risk customers.
+
+Education
+
+Bachelor of Science in Statistics
+Savitribai Phule Pune University
+2020
+
+Certifications
+
+* Google Data Analytics Professional Certificate
+* Microsoft Power BI Data Analyst Associate
+
+Portfolio
+
+https://rahulverma-portfolio.example.com
