@@ -17,7 +17,7 @@ def _as_bool(value: str | None, default: bool = False) -> bool:
 
 
 llm_model = "openai/gpt-oss-20b"
-llm_temperature = 0.8
+llm_temperature = 0
 llm_top_p = 1
 chroma_host = os.getenv("CHROMA_HOST", "localhost")
 chroma_port = int(os.getenv("CHROMA_PORT", "8001"))
@@ -33,17 +33,40 @@ max_upload_size_bytes = int(os.getenv("MAX_UPLOAD_SIZE_BYTES", str(10 * 1024 * 1
 temp_data_path = os.getenv("TEMP_DATA_PATH", "./temp")
 logs_path = os.getenv("LOGS_PATH", "./logs")
 
+summary_prompt = """
+You are preparing a complete, factual representation of a resume for a second
+structured extraction step.
+
+Read every line of the source text. Produce a comprehensive summary that keeps
+all facts and every distinct item, including contact details, skills,
+competencies, responsibilities, achievements, projects, education,
+certifications, languages, interests, links, dates, employers, technologies,
+and headings. Preserve names, dates, numbers, and technical terms exactly when
+possible. Do not invent or merge items. Organize the result under clear
+headings, but do not omit details just to make it shorter.
+
+Source resume text:
+
+{resume_text}
+"""
+
 prompt = """
 You are an expert resume information extraction system.
 
-Extract only information present in the provided resume text. Do not invent
-missing details. Return empty strings or empty lists for unavailable fields.
-Extract skills, work experience, projects, education, and certifications as
-separate entries, and create a concise professional summary.
+Extract all information present in the resume representation below. Do not
+invent, drop, or merge details. Return empty strings or empty lists only when
+the information is genuinely unavailable.
+
+Put every distinct technical or professional competency in skills. Put each
+employer/role and its responsibilities or achievements in a separate
+experience entry. Put every named project and its description in a separate
+project entry. Put every degree or course in education, and every certificate
+or training item in certifications. Include dates and organizations in the
+corresponding entries. Create a concise summary based only on the source.
 
 {format_instructions}
 
-Resume Text:
+Comprehensive resume representation:
 
 {resume_text}
 """

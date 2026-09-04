@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 from resumeDataParse import main as resume_parser
 from resumeDataParse.main import parse_text
-from .helpers import FakeChain, FakeParser
+from .helpers import FakeChain, FakeParser, FakeSummaryChain
 
 
 class TxtToLlmTests(unittest.TestCase):
@@ -14,7 +14,7 @@ class TxtToLlmTests(unittest.TestCase):
     def test_txt_to_llm_parse(self):
         with patch.object(
             resume_parser, "build_chain", return_value=(FakeChain(), FakeParser())
-        ):
+        ), patch.object(resume_parser, "build_summary_chain", return_value=FakeSummaryChain()):
             result = parse_text("--- Page 1 ---\nTest Candidate\nPython")
         self.assertEqual(result["name"], "Test Candidate")
         self.assertEqual(result["skills"], ["Python"])

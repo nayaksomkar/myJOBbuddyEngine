@@ -17,13 +17,13 @@ import os
 from pathlib import Path
 
 from dotenv import load_dotenv
-from langchain_core.output_parsers import PydanticOutputParser
+from langchain_core.output_parsers import PydanticOutputParser, StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_nvidia_ai_endpoints import ChatNVIDIA
 
 from .mainfunc import append_resume_json, fetch_file_contents
 from .parserMain import Resume
-from config.config import llm_model, llm_temperature, llm_top_p
+from config.config import llm_model, llm_temperature, llm_top_p, summary_prompt
 from config.resume_parser_config import folder_path, output_file, prompt
 
 # This child directory owns the script, while shared data and secrets live in config/.
@@ -33,6 +33,22 @@ PROJECT_ROOT = Path(__file__).resolve().parent
 load_dotenv(PROJECT_ROOT.parent / "config" / ".env")
 
 
+def _build_llm():
+    """Configure the hosted model used for both resume-processing stages."""
+    return ChatNVIDIA(
+        model=llm_model,
+        api_key=os.getenv("NVIDIA_API_KEY"),
+        temperature=llm_temperature,
+        top_p=llm_top_p,
+    )
+
+
+def build_summary_chain():
+    """Build the detail-preserving resume summarization stage."""
+    prompt_template = ChatPromptTemplate.from_template(summary_prompt)
+    return prompt_template | _build_llm() | StrOutputParser()
+
+
 def build_chain():
     """Assemble the LangChain extraction pipeline.
 
@@ -40,13 +56,7 @@ def build_chain():
         A callable chain that takes a dict with `resume_text` and
         `format_instructions` keys and returns a validated `Resume` object.
     """
-    # Configure the hosted model from the shared environment.
-    llm = ChatNVIDIA(
-        model=llm_model,
-        api_key=os.getenv("NVIDIA_API_KEY"),
-        temperature=llm_temperature,
-        top_p=llm_top_p,
-    )
+    llm = _build_llm()
 
     # Parser turns the LLM's free-form text output into a Resume object,
     # and provides the schema instructions injected into the prompt.
@@ -61,11 +71,13 @@ def build_chain():
 
 
 def parse_text(extracted_text: str) -> dict:
-    """Parse extracted text into the validated resume data structure."""
+    """Summarize all extracted text, then parse it into resume fields."""
+    summary_chain = build_summary_chain()
     chain, parser = build_chain()
+    comprehensive_summary = summary_chain.invoke({"resume_text": extracted_text})
     parsed = chain.invoke(
         {
-            "resume_text": extracted_text,
+            "resume_text": comprehensive_summary,
             "format_instructions": parser.get_format_instructions(),
         }
     )
@@ -83,6 +95,7 @@ def main() -> None:
         )
 
     # Build the chain once and reuse it for every input file.
+    summary_chain = build_summary_chain()
     chain, parser = build_chain()
 
     # Folder path from config/resume_parser_config.py is relative to the project root.
@@ -95,10 +108,10 @@ def main() -> None:
     for resume_id, resume_text in enumerate(resume_contents, start=1):
         print(f"Parsing resume {resume_id}/{len(resume_contents)} ...")
 
-        # Invoke the chain with the resume text plus the schema instructions.
+        comprehensive_summary = summary_chain.invoke({"resume_text": resume_text})
         result = chain.invoke(
             {
-                "resume_text": resume_text,
+                "resume_text": comprehensive_summary,
                 "format_instructions": parser.get_format_instructions(),
             }
         )

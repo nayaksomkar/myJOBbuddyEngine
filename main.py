@@ -147,40 +147,48 @@ def get_sample_resume_text_file(filename: str) -> str:
 
 
 @app.post("/parse")
-async def parse_pdf(
+async def parse_resume(
     file: UploadFile = File(...),
     index: bool = False,
 ) -> dict:
-    """Extract and parse one uploaded PDF."""
-    if file.content_type != "application/pdf":
-        raise HTTPException(status_code=415, detail="Only PDF files are supported")
+    """Extract text from and parse one uploaded PDF or TXT file."""
+    filename = file.filename or "document"
+    suffix = Path(filename).suffix.lower()
+    content_type = file.content_type or ""
+    if suffix not in {".pdf", ".txt"}:
+        raise HTTPException(status_code=415, detail="Only PDF and TXT files are supported")
 
-    suffix = Path(file.filename or "document.pdf").suffix or ".pdf"
-    # A temporary file lets the shared extractor process the upload by path.
-    pdf_bytes = await file.read(max_upload_size_bytes + 1)
-    if len(pdf_bytes) > max_upload_size_bytes:
-        raise HTTPException(status_code=413, detail="Uploaded PDF is too large")
+    uploaded_bytes = await file.read(max_upload_size_bytes + 1)
+    if len(uploaded_bytes) > max_upload_size_bytes:
+        raise HTTPException(status_code=413, detail="Uploaded file is too large")
 
-    with tempfile.NamedTemporaryFile(suffix=suffix, dir=temp_data_path) as temporary_file:
-        temporary_file.write(pdf_bytes)
-        temporary_file.flush()
+    if suffix == ".txt" or content_type == "text/plain":
         try:
-            extracted_text = extract_text(temporary_file.name)
-        except Exception as error:
-            logger.exception("pdf_extraction_failed filename=%s", file.filename)
-            raise HTTPException(status_code=422, detail="The PDF could not be read") from error
+            extracted_text = uploaded_bytes.decode("utf-8")
+        except UnicodeDecodeError as error:
+            raise HTTPException(status_code=422, detail="The TXT file is not valid UTF-8") from error
+    else:
+        # A temporary file lets the shared extractor process the PDF by path.
+        with tempfile.NamedTemporaryFile(suffix=suffix, dir=temp_data_path) as temporary_file:
+            temporary_file.write(uploaded_bytes)
+            temporary_file.flush()
+            try:
+                extracted_text = extract_text(temporary_file.name)
+            except Exception as error:
+                logger.exception("pdf_extraction_failed filename=%s", filename)
+                raise HTTPException(status_code=422, detail="The PDF could not be read") from error
 
     if not extracted_text.strip():
-        raise HTTPException(status_code=422, detail="The PDF contains no extractable text")
+        raise HTTPException(status_code=422, detail="The uploaded file contains no text")
 
     try:
         parsed_data = parse_text(extracted_text)
     except Exception as error:
-        logger.exception("llm_parsing_failed filename=%s", file.filename)
+        logger.exception("llm_parsing_failed filename=%s", filename)
         raise HTTPException(status_code=502, detail="Resume parsing service failed") from error
 
     if index:
-        document_id = hashlib.sha256(pdf_bytes).hexdigest()
+        document_id = hashlib.sha256(uploaded_bytes).hexdigest()
         try:
             store_vectors(document_id, parsed_data)
         except Exception as error:

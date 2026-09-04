@@ -2,6 +2,7 @@
 
 from fastapi.testclient import TestClient
 
+import main
 from main import app
 
 
@@ -61,3 +62,20 @@ def test_single_sample_resume_text_endpoint_returns_not_found():
         response = client.get("/sample_resume_txt/missing.txt")
 
     assert response.status_code == 404
+
+
+def test_parse_accepts_txt_upload(monkeypatch):
+    monkeypatch.setattr(
+        main,
+        "parse_text",
+        lambda text: {"resume_content": {"name": text.splitlines()[0]}},
+    )
+
+    with TestClient(app) as client:
+        response = client.post(
+            "/parse",
+            files={"file": ("resume.txt", b"Aarav Sharma\nPython", "text/plain")},
+        )
+
+    assert response.status_code == 200
+    assert response.json()["data"]["resume_content"]["name"] == "Aarav Sharma"

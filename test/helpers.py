@@ -27,3 +27,10 @@ class FakeParser:
 
     def get_format_instructions(self):
         return "return Resume JSON"
+
+
+class FakeSummaryChain:
+    """Return the original text so parser tests avoid a network call."""
+
+    def invoke(self, values):
+        return values["resume_text"]

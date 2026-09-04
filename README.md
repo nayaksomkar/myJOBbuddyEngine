@@ -155,12 +155,23 @@ curl http://localhost:8000/sample_data
 curl http://localhost:8000/sample_resume_txt
 ```
 
-Parse a PDF:
+Parse a PDF or TXT resume:
 
 ```bash
 curl -X POST http://localhost:8000/parse \
   -F "file=@resume.pdf"
+
+curl -X POST http://localhost:8000/parse \
+  -F "file=@resume.txt"
+
+curl -X POST http://localhost:8000/parse \
+  -F "file=@data/resume_txt/resumeONE.txt"
 ```
+
+The parser first extracts all readable text, creates a detail-preserving
+comprehensive summary, and then converts that summary into the structured
+resume response. Parsing uses the configured NVIDIA model with deterministic
+temperature `0`.
 
 Index a parsed PDF in the external ChromaDB service:
 
