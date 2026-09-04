@@ -89,7 +89,9 @@ Set `NVIDIA_API_KEY` in `config/.env`. Never commit that file.
 | --- | --- | --- | --- |
 | `GET` | `/health` | Check service status | No |
 | `GET` | `/sample_data` | Return prepared parsed resumes | No |
+| `GET` | `/sample_data/{resume_id}` | Return one prepared parsed resume | No |
 | `GET` | `/sample_resume_txt` | Return sample text files | No |
+| `GET` | `/sample_resume_txt/{filename}` | Return one raw sample resume text file | No |
 | `POST` | `/parse` | Parse an uploaded PDF | Yes |
 | `POST` | `/parse?index=true` | Parse and send data to external ChromaDB | Yes |
 
@@ -116,6 +118,13 @@ Test the no-AI routes from another terminal:
 curl http://localhost:8000/health
 curl http://localhost:8000/sample_data
 curl http://localhost:8000/sample_resume_txt
+```
+
+Fetch one parsed resume or one raw resume text file:
+
+```bash
+curl http://localhost:8000/sample_data/1
+curl http://localhost:8000/sample_resume_txt/resumeONE.txt
 ```
 
 Stop the server with `Ctrl+C`.

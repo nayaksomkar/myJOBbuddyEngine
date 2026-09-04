@@ -9,6 +9,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
+from fastapi.responses import PlainTextResponse
 import chromadb
 from langchain_nvidia_ai_endpoints import NVIDIAEmbeddings
 
@@ -95,6 +96,25 @@ def get_sample_data() -> list[dict]:
         raise HTTPException(status_code=500, detail="Sample data is unavailable") from error
 
 
+@app.get("/sample_data/{resume_id}")
+def get_sample_resume(resume_id: int) -> dict:
+    """Return one prepared resume result without calling the AI service."""
+    try:
+        with sample_data_path.open("r", encoding="utf-8") as data_file:
+            sample_data = json.load(data_file)
+    except (OSError, json.JSONDecodeError) as error:
+        logger.exception("sample_data_read_failed path=%s", sample_data_path)
+        raise HTTPException(status_code=500, detail="Sample data is unavailable") from error
+
+    resume = next(
+        (item for item in sample_data if item.get("resume_id") == resume_id),
+        None,
+    )
+    if resume is None:
+        raise HTTPException(status_code=404, detail="Sample resume not found")
+    return resume
+
+
 @app.get("/sample_resume_txt")
 def get_sample_resume_text() -> dict[str, list[dict[str, str]]]:
     """Return the bundled sample resume text files without AI processing."""
@@ -107,6 +127,22 @@ def get_sample_resume_text() -> dict[str, list[dict[str, str]]]:
         return {"files": files}
     except OSError as error:
         logger.exception("sample_text_read_failed path=%s", sample_resume_text_path)
+        raise HTTPException(status_code=500, detail="Sample text is unavailable") from error
+
+
+@app.get("/sample_resume_txt/{filename}", response_class=PlainTextResponse)
+def get_sample_resume_text_file(filename: str) -> str:
+    """Return one bundled sample resume as raw text."""
+    file_path = (sample_resume_text_path / filename).resolve()
+    if file_path.parent != sample_resume_text_path.resolve() or file_path.suffix != ".txt":
+        raise HTTPException(status_code=404, detail="Sample resume text not found")
+
+    try:
+        return file_path.read_text(encoding="utf-8")
+    except FileNotFoundError as error:
+        raise HTTPException(status_code=404, detail="Sample resume text not found") from error
+    except OSError as error:
+        logger.exception("sample_text_read_failed path=%s", file_path)
         raise HTTPException(status_code=500, detail="Sample text is unavailable") from error
 
 
