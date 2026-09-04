@@ -1,7 +1,7 @@
 """Standalone copy of the PDF page-text extraction helper."""
 
 import sys  # for reading command-line arguments
-import fitz  # PyMuPDF – the library that reads PDF files
+import pymupdf  # PyMuPDF – the library that reads PDF files
 
 
 def extract_text(pdf_path: str) -> str:
@@ -9,7 +9,7 @@ def extract_text(pdf_path: str) -> str:
     Opens a PDF, extracts text from every page,
     and labels each page with a '--- Page N ---' header.
     """
-    doc = fitz.open(pdf_path)          # open the PDF file
+    doc = pymupdf.open(pdf_path)       # open the PDF file
     pages = []                         # will hold text of each page
     for i, page in enumerate(doc, start=1):  # loop through pages (1-indexed)
         text = page.get_text()                # extract raw text from the page
