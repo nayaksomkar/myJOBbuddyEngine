@@ -1,0 +1,234 @@
+[
+    {
+        "resume_id": 1,
+        "resume_content": {
+            "name": "Aarav Sharma",
+            "email": "aarav.sharma@example.com",
+            "phone": "+91 9876543210",
+            "skills": [
+                "Python",
+                "Machine Learning",
+                "Deep Learning",
+                "PyTorch",
+                "TensorFlow",
+                "LangChain",
+                "LangGraph",
+                "FastAPI",
+                "Docker",
+                "Git",
+                "PostgreSQL",
+                "AWS",
+                "NLP",
+                "Vector Databases"
+            ],
+            "experience": [
+                "Machine Learning Engineer at TechNova Solutions (2023–Present): Developed a customer support chatbot using LangChain and vector databases, improved response accuracy by 28%, and built model evaluation pipelines for LLM applications.",
+                "AI Intern at DataMinds Analytics (2022–2023): Assisted in training classification models for customer segmentation and built dashboards for model monitoring and reporting."
+            ],
+            "projects": [
+                "Resume Screening System: Built an ATS-style resume ranking application using embeddings and semantic search.",
+                "Research Assistant Chatbot: Developed a document question-answering system using RAG and LangChain."
+            ],
+            "education": [
+                "Bachelor of Technology in Computer Science, Visvesvaraya Technological University, 2022"
+            ],
+            "certifications": [
+                "AWS Certified Cloud Practitioner",
+                "Deep Learning Specialization (Coursera)"
+            ],
+            "summary": "AI and Machine Learning Engineer with 3 years of experience building NLP applications, recommendation systems, and production‑ready machine learning pipelines. Skilled in Python, LangChain, PyTorch, and cloud deployment."
+        }
+    },
+    {
+        "resume_id": 2,
+        "resume_content": {
+            "name": "Priya Nair",
+            "email": "priya.nair@example.com",
+            "phone": "+91 9988776655",
+            "skills": [
+                "Python",
+                "Node.js",
+                "FastAPI",
+                "Django",
+                "Express.js",
+                "PostgreSQL",
+                "MySQL",
+                "Redis",
+                "Docker",
+                "Kubernetes",
+                "AWS",
+                "Linux",
+                "GitHub Actions"
+            ],
+            "experience": [
+                "Senior Backend Engineer – CloudEdge Systems (2022–Present): Designed microservices handling over 2 million API requests daily; Reduced database latency by 35% through optimization strategies.",
+                "Software Engineer – BlueTech Labs (2020–2022): Built REST APIs and authentication services; Implemented CI/CD pipelines for production deployments."
+            ],
+            "projects": [
+                "Inventory Management Platform – Developed a scalable inventory system for retail businesses.",
+                "Event Booking API – Built a ticket booking backend supporting real-time seat allocation."
+            ],
+            "education": [
+                "Bachelor of Engineering in Information Technology, University of Kerala, 2020"
+            ],
+            "certifications": [
+                "Docker Certified Associate",
+                "AWS Solutions Architect Associate"
+            ],
+            "summary": "Backend Software Engineer with 5 years of experience designing scalable APIs, distributed systems, and database-driven applications. Skilled in Python, Node.js, PostgreSQL, AWS, and cloud-native development."
+        }
+    },
+    {
+        "resume_id": 3,
+        "resume_content": {
+            "name": "Rahul Verma",
+            "email": "rahul.verma@example.com",
+            "phone": "+91 9123456780",
+            "skills": [
+                "SQL",
+                "Python",
+                "Pandas",
+                "NumPy",
+                "Power BI",
+                "Tableau",
+                "Excel",
+                "Data Visualization",
+                "Statistics",
+                "Business Intelligence",
+                "ETL"
+            ],
+            "experience": [
+                "Data Analyst – InsightWorks Consulting (2021–Present): Created executive dashboards used by senior management; Automated reporting workflows, reducing manual effort by 70%.",
+                "Junior Data Analyst – SmartMetrics Pvt Ltd (2020–2021): Performed customer behavior analysis and KPI tracking; Built data cleaning pipelines using Python and SQL."
+            ],
+            "projects": [
+                "Sales Forecasting Dashboard: Developed predictive sales reports using historical transaction data.",
+                "Customer Churn Analysis: Built machine learning models to identify at-risk customers."
+            ],
+            "education": [
+                "Bachelor of Science in Statistics, Savitribai Phule Pune University, 2020"
+            ],
+            "certifications": [
+                "Google Data Analytics Professional Certificate",
+                "Microsoft Power BI Data Analyst Associate"
+            ],
+            "summary": "Data Analyst with 4 years of experience delivering actionable insights through dashboards, automation, and predictive modeling. Skilled in SQL, Python, Power BI, and statistical analysis."
+        }
+    },
+    {
+        "resume_id": 1,
+        "resume_content": {
+            "name": "Aarav Sharma",
+            "email": "aarav.sharma@example.com",
+            "phone": "+91 9876543210",
+            "skills": [
+                "Python",
+                "Machine Learning",
+                "Deep Learning",
+                "PyTorch",
+                "TensorFlow",
+                "LangChain",
+                "LangGraph",
+                "FastAPI",
+                "Docker",
+                "Git",
+                "PostgreSQL",
+                "AWS",
+                "NLP",
+                "Vector Databases"
+            ],
+            "experience": [
+                "Machine Learning Engineer – TechNova Solutions (2023–Present): Developed a customer support chatbot using LangChain and vector databases; Improved response accuracy by 28%; Built model evaluation pipelines for LLM applications.",
+                "AI Intern – DataMinds Analytics (2022–2023): Assisted in training classification models for customer segmentation; Built dashboards for model monitoring and reporting."
+            ],
+            "projects": [
+                "Resume Screening System: Built an ATS-style resume ranking application using embeddings and semantic search.",
+                "Research Assistant Chatbot: Developed a document question-answering system using RAG and LangChain."
+            ],
+            "education": [
+                "Bachelor of Technology in Computer Science, Visvesvaraya Technological University, 2022"
+            ],
+            "certifications": [
+                "AWS Certified Cloud Practitioner",
+                "Deep Learning Specialization (Coursera)"
+            ],
+            "summary": "AI and Machine Learning Engineer with 3 years of experience building NLP applications, recommendation systems, and production-ready machine learning pipelines. Skilled in Python, LangChain, PyTorch, and cloud deployment."
+        }
+    },
+    {
+        "resume_id": 2,
+        "resume_content": {
+            "name": "Rahul Verma",
+            "email": "rahul.verma@example.com",
+            "phone": "+91 9123456780",
+            "skills": [
+                "SQL",
+                "Python",
+                "Pandas",
+                "NumPy",
+                "Power BI",
+                "Tableau",
+                "Excel",
+                "Data Visualization",
+                "Statistics",
+                "Business Intelligence",
+                "ETL"
+            ],
+            "experience": [
+                "Data Analyst – InsightWorks Consulting (2021–Present): Created executive dashboards used by senior management. Automated reporting workflows, reducing manual effort by 70%.",
+                "Junior Data Analyst – SmartMetrics Pvt Ltd (2020–2021): Performed customer behavior analysis and KPI tracking. Built data cleaning pipelines using Python and SQL."
+            ],
+            "projects": [
+                "Sales Forecasting Dashboard: Developed predictive sales reports using historical transaction data.",
+                "Customer Churn Analysis: Built machine learning models to identify at-risk customers."
+            ],
+            "education": [
+                "Bachelor of Science in Statistics, Savitribai Phule Pune University, 2020"
+            ],
+            "certifications": [
+                "Google Data Analytics Professional Certificate",
+                "Microsoft Power BI Data Analyst Associate"
+            ],
+            "summary": "Data Analyst with 4 years of experience transforming business data into actionable insights. Proficient in SQL, Power BI, Excel, Python, and statistical analysis."
+        }
+    },
+    {
+        "resume_id": 3,
+        "resume_content": {
+            "name": "Priya Nair",
+            "email": "priya.nair@example.com",
+            "phone": "+91 9988776655",
+            "skills": [
+                "Python",
+                "Node.js",
+                "FastAPI",
+                "Django",
+                "Express.js",
+                "PostgreSQL",
+                "MySQL",
+                "Redis",
+                "Docker",
+                "Kubernetes",
+                "AWS",
+                "Linux",
+                "GitHub Actions"
+            ],
+            "experience": [
+                "Senior Backend Engineer – CloudEdge Systems (2022–Present): Designed microservices handling over 2 million API requests daily. Reduced database latency by 35% through optimization strategies.",
+                "Software Engineer – BlueTech Labs (2020–2022): Built REST APIs and authentication services. Implemented CI/CD pipelines for production deployments."
+            ],
+            "projects": [
+                "Inventory Management Platform: Developed a scalable inventory system for retail businesses.",
+                "Event Booking API: Built a ticket booking backend supporting real-time seat allocation."
+            ],
+            "education": [
+                "Bachelor of Engineering in Information Technology, University of Kerala, 2020"
+            ],
+            "certifications": [
+                "Docker Certified Associate",
+                "AWS Solutions Architect Associate"
+            ],
+            "summary": "Backend Software Engineer with 5 years of experience designing scalable APIs, distributed systems, and database-driven applications. Experienced in Python, Node.js, PostgreSQL, and cloud-native development."
+        }
+    }
+]

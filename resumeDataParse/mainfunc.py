@@ -13,7 +13,7 @@ def fetch_file_contents(folder_path: str) -> List[str]:
     """Read and return the text contents of every `.txt` file in a folder.
 
     Non-text files and hidden files (e.g. `.DS_Store`) are skipped, and the
-    files are processed in sorted order so the output `resume.json` is
+    files are processed in sorted order so the output `data/resume.json` is
     deterministic across runs.
 
     Args:

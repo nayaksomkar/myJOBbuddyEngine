@@ -1,6 +1,6 @@
 """Configuration for the standalone resume parser functions."""
 
-from config import prompt
+from config.config import prompt
 
 folder_path = "data/resume_txt"
-output_file = "resume.json"
+output_file = "data/resume.json"

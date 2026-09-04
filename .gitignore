@@ -11,4 +11,8 @@ wheels/
 
 # Local secrets and generated parser output
 .env
-resume.json
+/resume.json
+temp/*
+!temp/.gitkeep
+logs/*
+!logs/.gitkeep

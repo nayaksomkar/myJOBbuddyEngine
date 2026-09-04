@@ -1,125 +1,195 @@
 # myJOBbuddy Engine
 
-myJOBbuddy Engine is a FastAPI service that extracts text from uploaded PDF
-resumes, sends the text to an NVIDIA-hosted LangChain model, and returns a
-validated structured resume. Optional ChromaDB indexing supports later
-retrieval workflows.
+A FastAPI service that reads PDF resumes and returns structured resume data.
+New PDFs use NVIDIA AI. Prepared sample data can be read without AI.
 
-## Architecture
+## How It Works
 
 ```text
-Client
-  |
-  v
-FastAPI backend (one container)
-  |
-  +-- UnwrapPDF       PDF text extraction
-  +-- resumeDataParse LLM prompt and Pydantic validation
-  +-- pdf2txt         Optional embedding/indexing utility
-  +-- ChromaDB        Optional local vector persistence
-  |
-  +-- NVIDIA API      External resume parsing model
+Client -> FastAPI Docker container -> PDF extraction -> NVIDIA AI -> Pydantic validation
+                                                        |
+                                                        +-> Optional external ChromaDB
 ```
 
-The API entry point is `main.py`. The existing utility modules remain
-separate and can still be used independently.
+The project runs the API in one container. ChromaDB is a separate external
+service; this container does not host or store the Chroma database.
+
+## Main Folders
+
+| Path | Purpose |
+| --- | --- |
+| `main.py` | FastAPI routes and application startup |
+| `UnwrapPDF/` | PDF extraction and external Chroma utility scripts |
+| `resumeDataParse/` | AI parsing and the Pydantic resume schema |
+| `data/resume.json` | Prepared parsed sample resumes |
+| `data/resume_txt/` | Sample resume text files |
+| `config/` | Application settings and environment files |
+| `docker/` | Dockerfile and container entrypoint |
+| `test/` | Automated tests |
+
+## Pydantic
+
+Pydantic checks that parsed resumes have the expected fields: name, email,
+phone, skills, experience, projects, education, certifications, and summary.
+It works like a form checker between the AI response and the API response.
+
+## What Is Inside the Container?
+
+The image contains:
+
+- Python 3.11 and locked packages from `pyproject.toml` and `uv.lock`.
+- FastAPI, Uvicorn, Pydantic, PyMuPDF, LangChain, ChromaDB client, and the
+  NVIDIA embeddings client.
+- Application code under `/app`.
+- Sample data under `/app/data/`.
+- `/app/temp/` for short-lived upload files.
+- `/app/logs/` for future file-based logs.
+- `/entrypoint.sh`, which starts Uvicorn using `PORT` or `8000`.
+
+The container runs as non-root user `appuser`, exposes port `8000`, and has a
+health check for `/health`. Normal logs are written to Docker stdout.
+
+The image does not contain `config/.env`, API keys, tests, Git files, or any
+ChromaDB database files. ChromaDB is accessed over HTTP using environment
+settings.
+
+## Lightweight Embeddings
+
+The API uses NVIDIA's hosted embeddings service when Chroma indexing is
+requested. This keeps embedding work outside the container and avoids local
+`sentence-transformers`, PyTorch, Triton, and CUDA packages. Set
+`NVIDIA_EMBEDDING_MODEL` to choose the NVIDIA embedding model.
 
 ## Configuration
 
-Copy `.env.example` to `.env` for local development and provide an NVIDIA API
-key. Never commit `.env` or real credentials.
+Create the local environment file:
 
-| Variable | Default | Purpose |
+```bash
+cp config/.env.example config/.env
+```
+
+Set `NVIDIA_API_KEY` in `config/.env`. Never commit that file.
+
+| Variable | Purpose | Default |
 | --- | --- | --- |
-| `NVIDIA_API_KEY` | required for `/parse` | NVIDIA model authentication |
-| `LOG_LEVEL` | `INFO` | Python log level |
-| `PORT` | `8000` | Application port used by direct startup |
-| `MAX_UPLOAD_SIZE_BYTES` | `10485760` | Maximum PDF upload size |
-| `PARSE_DATA_TO_VECTORS` | `false` | Index parsed data by default |
-| `CHROMA_DB_PATH` | `./chroma_db` | Chroma persistence directory |
+| `NVIDIA_API_KEY` | Enables new PDF parsing | Required for `/parse` |
+| `CHROMA_HOST` | External ChromaDB hostname | `localhost` |
+| `CHROMA_PORT` | External ChromaDB port | `8001` |
+| `CHROMA_SSL` | Use HTTPS for ChromaDB | `false` |
+| `CHROMA_COLLECTION` | ChromaDB collection name | `parsed_documents` |
+| `PORT` | API port | `8000` |
+| `LOG_LEVEL` | Log detail level | `INFO` |
+| `MAX_UPLOAD_SIZE_BYTES` | Maximum PDF size | `10485760` |
+| `TEMP_DATA_PATH` | Temporary file directory | `./temp` |
+| `LOGS_PATH` | Optional file-log directory | `./logs` |
 
-## Run Locally
+## API Routes
 
-Prerequisites: Python 3.11+, `uv`, and an NVIDIA API key for live parsing.
+| Method | Route | Purpose | AI needed? |
+| --- | --- | --- | --- |
+| `GET` | `/health` | Check service status | No |
+| `GET` | `/sample_data` | Return prepared parsed resumes | No |
+| `GET` | `/sample_resume_txt` | Return sample text files | No |
+| `POST` | `/parse` | Parse an uploaded PDF | Yes |
+| `POST` | `/parse?index=true` | Parse and send data to external ChromaDB | Yes |
 
-```bash
-cp .env.example .env
-# edit .env and set NVIDIA_API_KEY
-uv sync --group dev
-uv run uvicorn main:app --reload
-```
+## Test Locally
 
-The API listens on `http://localhost:8000`.
-
-## Docker
-
-Build and run the single application container:
-
-```bash
-docker build -t myjobbuddy:local .
-docker run --rm --name myjobbuddy \
-  --env-file .env \
-  -p 8000:8000 \
-  -v myjobbuddy-chroma:/app/chroma_db \
-  myjobbuddy:local
-```
-
-The image runs as a non-root user and exposes only port `8000`. The Chroma
-volume is optional when vector indexing is disabled. Mount it when indexed
-data must survive container replacement. The NVIDIA model and its API remain
-external services; the image does not contain model weights or secrets.
-
-## API and Health Check
-
-Check liveness without contacting NVIDIA or Chroma:
+Requirements: Python 3.11+ and `uv`.
 
 ```bash
-curl http://localhost:8000/health
-# {"status":"ok"}
-```
-
-Parse a resume:
-
-```bash
-curl -X POST http://localhost:8000/parse -F "file=@resume.pdf"
-curl -X POST "http://localhost:8000/parse?index=true" -F "file=@resume.pdf"
-```
-
-The service rejects non-PDF uploads, empty/unreadable PDFs, and uploads larger
-than `MAX_UPLOAD_SIZE_BYTES`. Provider and indexing failures are logged with
-tracebacks but return generic client-safe error messages.
-
-## Tests
-
-Tests use deterministic PDF, LLM, and Chroma fakes; they do not call NVIDIA or
-write to the repository's Chroma database.
-
-```bash
-uv sync --group dev
+uv sync --locked --group dev
 uv run pytest -q
 ```
 
-The GitHub Actions workflow runs the tests and builds the Docker image on
-pushes and pull requests.
+Expected result: `8 passed`.
 
-## Logging and Shutdown
+Start the API:
 
-Operational logs are written to stdout/stderr for `docker logs`:
+```bash
+uv run uvicorn main:app --host 127.0.0.1 --port 8000
+```
+
+Test the no-AI routes from another terminal:
+
+```bash
+curl http://localhost:8000/health
+curl http://localhost:8000/sample_data
+curl http://localhost:8000/sample_resume_txt
+```
+
+Stop the server with `Ctrl+C`.
+
+## Build and Run Docker
+
+Make sure Docker is running, then build from the project root:
+
+```bash
+docker build -f docker/Dockerfile -t myjobbuddy:local .
+```
+
+Run the API container. No Chroma volume is mounted because ChromaDB is
+external:
+
+```bash
+docker run --rm --name myjobbuddy \
+  --env-file config/.env \
+  -p 8000:8000 \
+  myjobbuddy:local
+```
+
+Test the container:
+
+```bash
+curl http://localhost:8000/health
+curl http://localhost:8000/sample_data
+curl http://localhost:8000/sample_resume_txt
+```
+
+Parse a PDF:
+
+```bash
+curl -X POST http://localhost:8000/parse \
+  -F "file=@resume.pdf"
+```
+
+Index a parsed PDF in the external ChromaDB service:
+
+```bash
+curl -X POST "http://localhost:8000/parse?index=true" \
+  -F "file=@resume.pdf"
+```
+
+View logs and stop the container:
 
 ```bash
 docker logs myjobbuddy
 docker stop myjobbuddy
 ```
 
-Startup, shutdown, request status/duration, and external-operation failures
-are logged. Credentials, request bodies, and provider exception details are
-not written to responses or normal request logs. `docker stop` sends the
-normal termination signal to Uvicorn for graceful shutdown.
+Inspect temporary and optional log files:
 
-## Deployment Notes
+```bash
+docker exec myjobbuddy sh -c 'find /app/temp -maxdepth 1 -type f -print'
+docker exec myjobbuddy sh -c 'find /app/logs -maxdepth 1 -type f -print'
+```
 
-Build this image in CI and deploy it to a container host that can inject
-`NVIDIA_API_KEY` as a secret and expose port `8000`. Configure a persistent
-volume only if Chroma indexing is enabled. The container filesystem is
-disposable; source PDFs and generated files should be supplied through an
-external storage workflow if that becomes a product requirement.
+Uploaded temporary files are removed after processing. Current logs use
+`docker logs`; the `logs/` folder is reserved for future JSON, SQLite, or text
+logs.
+
+## Hosting
+
+1. Run the tests and local Docker checks.
+2. Build and push `myjobbuddy:local` to a container registry.
+3. Configure the hosting provider to run the image.
+4. Add `NVIDIA_API_KEY` as a secret.
+5. Set the provider's `PORT`; the entrypoint uses it automatically.
+6. Set the health check path to `/health`.
+7. Allow outbound HTTPS access to NVIDIA.
+8. Set `CHROMA_HOST`, `CHROMA_PORT`, `CHROMA_SSL`, and
+   `CHROMA_COLLECTION` for the external ChromaDB service.
+
+The sample routes work without NVIDIA. The `/parse` route needs NVIDIA, and
+`/parse?index=true` also needs the external ChromaDB service. No database,
+Chroma volume, or extra database container is created by this project.

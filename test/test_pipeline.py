@@ -25,9 +25,9 @@ def run_pipeline() -> dict:
     client = unittest.mock.Mock()
     client.get_or_create_collection.return_value = collection
     model = unittest.mock.Mock()
-    model.encode.return_value.tolist.return_value = [[0.1, 0.2]]
-    with patch.object(main, "SentenceTransformer", return_value=model), patch.object(
-        main.chromadb, "PersistentClient", return_value=client
+    model.embed_documents.return_value = [[0.1, 0.2]]
+    with patch.object(main, "NVIDIAEmbeddings", return_value=model), patch.object(
+        main.chromadb, "HttpClient", return_value=client
     ):
         main.store_vectors("test-document", parsed_data)
 

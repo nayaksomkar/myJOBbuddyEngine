@@ -26,4 +26,4 @@ jobs:
         run: uv run pytest -q
 
       - name: Build Docker image
-        run: docker build -t myjobbuddy:ci .
+        run: docker build -f docker/Dockerfile -t myjobbuddy:ci .

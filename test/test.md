@@ -2,7 +2,7 @@
 
 Each pipeline step has its own test file. The tests create a tiny one-page PDF
 fixture and use fake LLM and Chroma clients, so they need no API request or
-real database write.
+real external database write.
 
 ## Test Steps
 
@@ -28,7 +28,7 @@ assert parsed_data["name"] == "Test Candidate"
 
 Status: PASS using a fake chain. No API request was made.
 
-### 3. Parsed data to ChromaDB
+### 3. Parsed data to external ChromaDB
 
 File: `test/test_parse_to_chroma.py`
 
@@ -37,7 +37,7 @@ store_vectors("test-document", {"name": "Test Candidate"})
 collection.upsert.assert_called_once()
 ```
 
-Status: PASS using fake embeddings and a fake Chroma collection. No real database was changed.
+Status: PASS using fake embeddings and a fake external Chroma collection. No real database was changed.
 
 ### 4. Service status
 
@@ -60,10 +60,44 @@ assert result["status"] == {"status": "ok"}
 
 Status: PASS. The pipeline file only calls the four production functions in order.
 
+### 6. HTTP health endpoint
+
+File: `test/test_api.py`
+
+```python
+response = client.get("/health")
+assert response.json() == {"status": "ok"}
+```
+
+Status: PASS using FastAPI's local test client. No external API request is made.
+
+### 7. Prepared sample data endpoint
+
+File: `test/test_api.py`
+
+```python
+response = client.get("/sample_data")
+assert response.json()[0]["resume_id"] == 1
+```
+
+Status: PASS. Reads `data/resume.json`; no AI request is made.
+
+### 8. Sample text endpoint
+
+File: `test/test_api.py`
+
+```python
+response = client.get("/sample_resume_txt")
+assert response.json()["files"]
+```
+
+Status: PASS. Reads the bundled files in `data/resume_txt/`.
+
 ## Run
 
 ```bash
-uv run python -m unittest discover -s test -p 'test_*.py' -v
+uv sync --locked --group dev
+uv run pytest -q
 ```
 
-Expected result: 5 tests passed.
+Expected result: 8 tests passed.

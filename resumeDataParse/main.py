@@ -1,11 +1,11 @@
 """Standalone batch entry point for parsing shared resume text files.
 
 Pipeline:
-    1. Load the NVIDIA API key from `.env`.
+    1. Load the NVIDIA API key from `config/.env`.
     2. Build a LangChain chain: PromptTemplate -> ChatNVIDIA (LLM) -> Pydantic parser.
     3. Read every `.txt` resume from `resume_txt/`.
     4. Run each resume through the chain and append the structured result to
-       `resume.json`.
+    `data/resume.json`.
 
 Run from the project root:
     uv run resume-parse
@@ -23,14 +23,14 @@ from langchain_nvidia_ai_endpoints import ChatNVIDIA
 
 from .mainfunc import append_resume_json, fetch_file_contents
 from .parserMain import Resume
-from config import llm_model, llm_temperature, llm_top_p
-from resume_parser_config import folder_path, output_file, prompt
+from config.config import llm_model, llm_temperature, llm_top_p
+from config.resume_parser_config import folder_path, output_file, prompt
 
-# This child directory owns the script, while shared data and secrets live at root.
+# This child directory owns the script, while shared data and secrets live in config/.
 PROJECT_ROOT = Path(__file__).resolve().parent
 
-# Load secrets from .env (NVIDIA_API_KEY) into os.environ.
-load_dotenv(PROJECT_ROOT.parent / ".env")
+# Load secrets from config/.env (NVIDIA_API_KEY) into os.environ.
+load_dotenv(PROJECT_ROOT.parent / "config" / ".env")
 
 
 def build_chain():
@@ -78,14 +78,14 @@ def main() -> None:
     if not api_key:
         raise EnvironmentError(
             "NVIDIA_API_KEY is not set. "
-            "Copy .env.example to .env and fill in your key "
+                "Copy config/.env.example to config/.env and fill in your key "
             "(get one at https://build.nvidia.com)."
         )
 
     # Build the chain once and reuse it for every input file.
     chain, parser = build_chain()
 
-    # Folder path from config.py is relative to the project root.
+    # Folder path from config/resume_parser_config.py is relative to the project root.
     input_folder = str(PROJECT_ROOT.parent / folder_path)
     output_path = PROJECT_ROOT.parent / output_file
 

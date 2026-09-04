@@ -1,7 +1,7 @@
 [project]
 name = "myjobbuddyengine"
 version = "0.1.0"
-description = "FastAPI PDF resume parsing and optional Chroma indexing service"
+description = "FastAPI PDF resume parsing service with external ChromaDB indexing"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -13,7 +13,6 @@ dependencies = [
 	"pymupdf>=1.28.2",
 	"python-dotenv>=1.0.0",
 	"python-multipart>=0.0.9",
-	"sentence-transformers>=3.0.0",
 	"uvicorn[standard]>=0.30.0",
 ]
 
