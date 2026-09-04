@@ -5,7 +5,7 @@ from unittest.mock import patch
 
 from resumeDataParse import main as resume_parser
 from resumeDataParse.main import parse_text
-from helpers import FakeChain, FakeParser
+from .helpers import FakeChain, FakeParser
 
 
 class TxtToLlmTests(unittest.TestCase):

@@ -2,23 +2,43 @@
 
 import hashlib
 import json
+import logging
 import tempfile
+import time
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 import chromadb
-from fastapi import FastAPI, File, HTTPException, Query, UploadFile
-from dotenv import load_dotenv
+from fastapi import FastAPI, File, HTTPException, Query, Request, UploadFile
 from sentence_transformers import SentenceTransformer
 
-from config import chroma_collection, chroma_db_path, parsedata2vectors
+from config import (
+    chroma_collection,
+    chroma_db_path,
+    log_level,
+    max_upload_size_bytes,
+    parsedata2vectors,
+    port,
+)
 from UnwrapPDF.pdf_extract import extract_text
 from resumeDataParse.main import parse_text
 
-# Load the single repository-level environment file before creating the LLM.
-load_dotenv(Path(__file__).resolve().parent / ".env")
+
+logging.basicConfig(
+    level=getattr(logging, log_level, logging.INFO),
+    format="%(asctime)s %(levelname)s %(name)s %(message)s",
+)
+logger = logging.getLogger("myjobbuddy")
 
 
-app = FastAPI(title="myJOBbuddy Engine")
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    logger.info("service_started port=%s", port)
+    yield
+    logger.info("service_stopped")
+
+
+app = FastAPI(title="myJOBbuddy Engine", lifespan=lifespan)
 
 
 def store_vectors(document_id: str, parsed_data: dict) -> None:
@@ -34,6 +54,21 @@ def store_vectors(document_id: str, parsed_data: dict) -> None:
         documents=[document],
         metadatas=[{"document_id": document_id}],
     )
+
+
+@app.middleware("http")
+async def request_logging(request: Request, call_next):
+    started = time.perf_counter()
+    response = await call_next(request)
+    elapsed_ms = (time.perf_counter() - started) * 1000
+    logger.info(
+        "request method=%s path=%s status=%s duration_ms=%.2f",
+        request.method,
+        request.url.path,
+        response.status_code,
+        elapsed_ms,
+    )
+    return response
 
 
 @app.get("/health")
@@ -52,11 +87,18 @@ async def parse_pdf(
 
     suffix = Path(file.filename or "document.pdf").suffix or ".pdf"
     # A temporary file lets the shared extractor process the upload by path.
-    pdf_bytes = await file.read()
+    pdf_bytes = await file.read(max_upload_size_bytes + 1)
+    if len(pdf_bytes) > max_upload_size_bytes:
+        raise HTTPException(status_code=413, detail="Uploaded PDF is too large")
+
     with tempfile.NamedTemporaryFile(suffix=suffix) as temporary_file:
         temporary_file.write(pdf_bytes)
         temporary_file.flush()
-        extracted_text = extract_text(temporary_file.name)
+        try:
+            extracted_text = extract_text(temporary_file.name)
+        except Exception as error:
+            logger.exception("pdf_extraction_failed filename=%s", file.filename)
+            raise HTTPException(status_code=422, detail="The PDF could not be read") from error
 
     if not extracted_text.strip():
         raise HTTPException(status_code=422, detail="The PDF contains no extractable text")
@@ -64,7 +106,8 @@ async def parse_pdf(
     try:
         parsed_data = parse_text(extracted_text)
     except Exception as error:
-        raise HTTPException(status_code=502, detail=f"LLM parsing failed: {error}") from error
+        logger.exception("llm_parsing_failed filename=%s", file.filename)
+        raise HTTPException(status_code=502, detail="Resume parsing service failed") from error
 
     should_index = parsedata2vectors if index is None else index
     if should_index:
@@ -72,7 +115,8 @@ async def parse_pdf(
         try:
             store_vectors(document_id, parsed_data)
         except Exception as error:
-            raise HTTPException(status_code=502, detail=f"Vector indexing failed: {error}") from error
+            logger.exception("vector_indexing_failed filename=%s", file.filename)
+            raise HTTPException(status_code=502, detail="Vector indexing service failed") from error
 
     return {"filename": file.filename, "indexed": should_index, "data": parsed_data}
 
@@ -80,7 +124,7 @@ async def parse_pdf(
 def main() -> None:
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=port)
 
 
 if __name__ == "__main__":

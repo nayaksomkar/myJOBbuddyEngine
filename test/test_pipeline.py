@@ -8,7 +8,7 @@ import main
 from UnwrapPDF.pdf_extract import extract_text
 from resumeDataParse.main import parse_text
 
-from helpers import FakeChain, FakeParser, sample_pdf_bytes
+from .helpers import FakeChain, FakeParser, sample_pdf_bytes
 
 
 def run_pipeline() -> dict:

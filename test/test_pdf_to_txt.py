@@ -4,7 +4,7 @@ import tempfile
 import unittest
 
 from UnwrapPDF.pdf_extract import extract_text
-from helpers import sample_pdf_bytes
+from .helpers import sample_pdf_bytes
 
 
 class PdfToTxtTests(unittest.TestCase):
