@@ -16,9 +16,11 @@ def _as_bool(value: str | None, default: bool = False) -> bool:
 	return value.strip().lower() in {"1", "true", "yes", "on"}
 
 
-llm_model = "openai/gpt-oss-20b"
+llm_provider = "mistral"
+llm_model = "open-mistral-nemo"
 llm_temperature = 0
 llm_top_p = 1
+llm_max_tokens = 4096
 chroma_host = os.getenv("CHROMA_HOST", "localhost")
 chroma_port = int(os.getenv("CHROMA_PORT", "8001"))
 chroma_ssl = _as_bool(os.getenv("CHROMA_SSL"), default=False)

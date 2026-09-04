@@ -1,8 +1,8 @@
 """Standalone batch entry point for parsing shared resume text files.
 
 Pipeline:
-    1. Load the NVIDIA API key from `config/.env`.
-    2. Build a LangChain chain: PromptTemplate -> ChatNVIDIA (LLM) -> Pydantic parser.
+    1. Load the API key from `config/.env`.
+    2. Build a LangChain chain: PromptTemplate -> ChatMistralAI (LLM) -> Pydantic parser.
     3. Read every `.txt` resume from `resume_txt/`.
     4. Run each resume through the chain and append the structured result to
     `data/resume.json`.
@@ -19,27 +19,28 @@ from pathlib import Path
 from dotenv import load_dotenv
 from langchain_core.output_parsers import PydanticOutputParser, StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_nvidia_ai_endpoints import ChatNVIDIA
+from langchain_mistralai import ChatMistralAI
 
 from .mainfunc import append_resume_json, fetch_file_contents
 from .parserMain import Resume
-from config.config import llm_model, llm_temperature, llm_top_p, summary_prompt
+from config.config import llm_model, llm_temperature, llm_top_p, llm_max_tokens, summary_prompt
 from config.resume_parser_config import folder_path, output_file, prompt
 
 # This child directory owns the script, while shared data and secrets live in config/.
 PROJECT_ROOT = Path(__file__).resolve().parent
 
-# Load secrets from config/.env (NVIDIA_API_KEY) into os.environ.
+# Load secrets from config/.env into os.environ.
 load_dotenv(PROJECT_ROOT.parent / "config" / ".env")
 
 
 def _build_llm():
     """Configure the hosted model used for both resume-processing stages."""
-    return ChatNVIDIA(
+    return ChatMistralAI(
         model=llm_model,
-        api_key=os.getenv("NVIDIA_API_KEY"),
+        api_key=os.getenv("MISTRAL_API_KEY"),
         temperature=llm_temperature,
         top_p=llm_top_p,
+        max_tokens=llm_max_tokens,
     )
 
 
@@ -86,12 +87,12 @@ def parse_text(extracted_text: str) -> dict:
 
 def main() -> None:
     """Orchestrate the full parse-and-persist pipeline."""
-    api_key = os.getenv("NVIDIA_API_KEY")
+    api_key = os.getenv("MISTRAL_API_KEY")
     if not api_key:
         raise EnvironmentError(
-            "NVIDIA_API_KEY is not set. "
+            "MISTRAL_API_KEY is not set. "
                 "Copy config/.env.example to config/.env and fill in your key "
-            "(get one at https://build.nvidia.com)."
+            "(get one at https://console.mistral.ai/)."
         )
 
     # Build the chain once and reuse it for every input file.
