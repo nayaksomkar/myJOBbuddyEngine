@@ -9,6 +9,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
 import chromadb
 from langchain_nvidia_ai_endpoints import NVIDIAEmbeddings
@@ -48,6 +49,19 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(title="myJOBbuddy Engine", lifespan=lifespan)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "https://nayaksomkar.github.io",
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://127.0.0.1:5500",
+    ],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type"],
+)
 
 
 def store_vectors(document_id: str, parsed_data: dict) -> None:

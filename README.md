@@ -213,3 +213,33 @@ logs.
 The sample routes work without NVIDIA. The `/parse` route needs NVIDIA, and
 `/parse?index=true` also needs the external ChromaDB service. No database,
 Chroma volume, or extra database container is created by this project.
+
+## CORS Configuration
+
+The API uses FastAPI's `CORSMiddleware` to allow cross-origin requests from
+the GitHub Pages frontend. Allowed origins are configured in `main.py`:
+
+- `https://nayaksomkar.github.io` (production frontend)
+- `http://localhost:3000` (local dev server)
+- `http://localhost:5173` (Vite dev server)
+- `http://127.0.0.1:5500` (Live Server)
+
+If you deploy the frontend to a different domain, add it to the
+`allow_origins` list in `main.py`.
+
+## Live Deployment
+
+| Service | URL |
+| --- | --- |
+| Frontend (GitHub Pages) | `https://nayaksomkar.github.io/myJOBbuddyEngine` |
+| Backend (Render) | `https://myjobbuddy-engine.onrender.com` |
+
+Test the live backend health:
+
+```bash
+curl https://myjobbuddy-engine.onrender.com/health
+```
+
+Test the live upload from the deployed frontend by uploading a PDF through
+the GitHub Pages UI. The browser will send a CORS preflight (`OPTIONS`) before
+the `POST /parse` request.
